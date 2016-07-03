@@ -1,4 +1,10 @@
 /**
+ * Update Copyright (c) 2016 David Hawkins
+ * Code Updated for IOS7 and Higher by David Hawkins 03/07/2016
+ * I've been wrestling with Muh Hon Cheng's code for years and I
+ * was finally able to make it compatible with verions of IOS higher
+ * than IOS 7.  Below is the original Copyright info from Hon Cheng. -David
+ *
  * Copyright (c) 2011 Muh Hon Cheng
  * Created by honcheng on 28/4/11.
  * 
@@ -25,7 +31,7 @@
  * IN CONNECTION WITH THE SOFTWARE OR 
  * THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * 
- * @author 		Muh Hon Cheng <honcheng@gmail.com>
+ * @authors 		Muh Hon Cheng <honcheng@gmail.com>, David Hawkins <david@dhienterprises.com>
  * @copyright	2011	Muh Hon Cheng
  * @version
  * 
@@ -192,8 +198,26 @@
 				
 				//float text_x = x + 10;
 				NSString *percentageText = [NSString stringWithFormat:@"%.1f%%", component.value/total*100];
-				CGSize optimumSize = [percentageText sizeWithFont:self.percentageFont constrainedToSize:CGSizeMake(max_text_width,100)];
-				CGRect percFrame = CGRectMake(5, left_label_y,  max_text_width, optimumSize.height);
+                NSAttributedString *attributedText =
+                [[NSAttributedString alloc]
+                 initWithString:percentageText
+                 attributes:@
+                 {
+                 NSFontAttributeName: self.percentageFont
+                 }];
+                CGRect percFrame = [attributedText boundingRectWithSize:(CGSize){max_text_width, 100}
+                                                                options:NSStringDrawingUsesLineFragmentOrigin
+                                                                context:nil];
+                percFrame.origin = CGPointMake(5, left_label_y);
+                
+                /* CGRect percFrame = [attributedText boundingRectWithSize:(CGSize){max_text_width, CGFLOAT_MAX}
+                                                           options:NSStringDrawingUsesLineFragmentOrigin
+                                                           context:nil];
+                 */
+                CGSize optimumSize = percFrame.size;
+                
+				//CGSize optimumSize = [percentageText sizeWithFont:self.percentageFont constrainedToSize:CGSizeMake(max_text_width,100)];
+			//	CGRect percFrame = CGRectMake(5, left_label_y,  max_text_width, optimumSize.height);
         
         if (self.hasOutline) {
           CGContextSaveGState(ctx);
@@ -202,12 +226,31 @@
           CGContextSetLineJoin(ctx, kCGLineJoinRound);
           CGContextSetTextDrawingMode (ctx, kCGTextFillStroke);
           CGContextSetRGBStrokeColor(ctx, 0.2f, 0.2f, 0.2f, 0.8f);
-          
-          [percentageText drawInRect:percFrame withFont:self.percentageFont lineBreakMode:UILineBreakModeWordWrap alignment:UITextAlignmentRight];
+            NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle defaultParagraphStyle] mutableCopy];
+            paragraphStyle.lineBreakMode = NSLineBreakByWordWrapping;
+            paragraphStyle.alignment = NSTextAlignmentRight;
+            
+            
+            
+            [percentageText drawInRect:percFrame withAttributes: @{NSFontAttributeName: self.percentageFont,
+                                                                   NSParagraphStyleAttributeName: paragraphStyle }];
+           
+            /* [attributedText boundingRectWithSize:(CGSize){max_text_width, CGFLOAT_MAX}
+             options:NSStringDrawingUsesLineFragmentOrigin
+             context:nil];
+             */
+          //[percentageText drawInRect:percFrame withFont:self.percentageFont lineBreakMode:NSLineBreakByWordWrapping alignment:NSTextAlignmentRight];
           
           CGContextRestoreGState(ctx);
         } else {
-          [percentageText drawInRect:percFrame withFont:self.percentageFont lineBreakMode:UILineBreakModeWordWrap alignment:UITextAlignmentRight];
+            NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle defaultParagraphStyle] mutableCopy];
+            paragraphStyle.lineBreakMode = NSLineBreakByWordWrapping;
+            paragraphStyle.alignment = NSTextAlignmentRight;
+            
+            [percentageText drawInRect:percFrame withAttributes: @{NSFontAttributeName: self.percentageFont,
+                                                                   NSParagraphStyleAttributeName: paragraphStyle }];
+            
+          //[percentageText drawInRect:percFrame withFont:self.percentageFont lineBreakMode:NSLineBreakByWordWrapping alignment:NSTextAlignmentRight];
         }
 				
 				if (self.showArrow)
@@ -314,9 +357,44 @@
 				// display title on the left
 				CGContextSetRGBFillColor(ctx, 0.4f, 0.4f, 0.4f, 1.0f);
 				left_label_y += optimumSize.height - 4;
-				optimumSize = [component.title sizeWithFont:self.titleFont constrainedToSize:CGSizeMake(max_text_width,100)];
+                
+           /*
+                NSString *percentageText = [NSString stringWithFormat:@"%.1f%%", component.value/total*100];
+                NSAttributedString *attributedText =
+                [[NSAttributedString alloc]
+                 initWithString:percentageText
+                 attributes:@
+                 {
+                 NSFontAttributeName: self.percentageFont
+                 }];
+                CGRect percFrame = [attributedText boundingRectWithSize:(CGSize){max_text_width, 100}
+                                                                options:NSStringDrawingUsesLineFragmentOrigin
+                                                                context:nil];
+               
+                CGSize optimumSize = percFrame.size;
+            
+            NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle defaultParagraphStyle] mutableCopy];
+            paragraphStyle.lineBreakMode = NSLineBreakByWordWrapping;
+            paragraphStyle.alignment = NSTextAlignmentRight;
+            
+            [percentageText drawInRect:percFrame withAttributes: @{NSFontAttributeName: self.percentageFont,
+            NSParagraphStyleAttributeName: paragraphStyle }];
+                */
+                
+                
+                NSAttributedString *theTitle = [[NSAttributedString alloc] initWithString:component.title attributes:@{NSFontAttributeName: self.titleFont}];
+                CGRect theRec = [theTitle boundingRectWithSize:(CGSize){max_text_width, 100}
+                                                                options:nil
+                                                                context:nil];
+                optimumSize = theRec.size;
+				//optimumSize = [component.title sizeWithFont:self.titleFont constrainedToSize:CGSizeMake(max_text_width,100)];
 				CGRect titleFrame = CGRectMake(5, left_label_y, max_text_width, optimumSize.height);
-				[component.title drawInRect:titleFrame withFont:self.titleFont lineBreakMode:UILineBreakModeWordWrap alignment:UITextAlignmentRight];
+                
+                NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle defaultParagraphStyle] mutableCopy];
+                paragraphStyle.lineBreakMode = NSLineBreakByWordWrapping;
+                paragraphStyle.alignment = NSTextAlignmentRight;
+                [component.title drawInRect:titleFrame withAttributes:@{NSFontAttributeName: self.titleFont, NSParagraphStyleAttributeName: paragraphStyle}];
+				//[component.title drawInRect:titleFrame withFont:self.titleFont lineBreakMode:NSLineBreakByWordWrapping alignment:NSTextAlignmentRight];
 				left_label_y += optimumSize.height + 10;
 			}
 			else 
@@ -340,8 +418,21 @@
 				
 				float text_x = x + self.diameter + 10;
 				NSString *percentageText = [NSString stringWithFormat:@"%.1f%%", component.value/total*100];
-				CGSize optimumSize = [percentageText sizeWithFont:self.percentageFont constrainedToSize:CGSizeMake(max_text_width,100)];
-				CGRect percFrame = CGRectMake(text_x, right_label_y, optimumSize.width, optimumSize.height);
+                NSAttributedString *attributedText =
+                [[NSAttributedString alloc]
+                 initWithString:percentageText
+                 attributes:@
+                 {
+                 NSFontAttributeName: self.percentageFont
+                 }];
+                CGRect percFrame = [attributedText boundingRectWithSize:(CGSize){max_text_width,100}
+                                                                options:NSStringDrawingUsesLineFragmentOrigin
+                                                                context:nil];
+                percFrame.origin = CGPointMake(text_x, right_label_y);
+                
+                CGSize optimumSize = percFrame.size;
+				//CGSize optimumSize = [percentageText sizeWithFont:self.percentageFont constrainedToSize:CGSizeMake(max_text_width,100)];
+				//CGRect percFrame = CGRectMake(text_x, right_label_y, optimumSize.width, optimumSize.height); CGRect percFrame = CGRectMake(5, left_label_y,  max_text_width, optimumSize.height);
         
         if (self.hasOutline) {
           CGContextSaveGState(ctx);
@@ -351,11 +442,11 @@
           CGContextSetTextDrawingMode (ctx, kCGTextFillStroke);
           CGContextSetRGBStrokeColor(ctx, 0.2f, 0.2f, 0.2f, 0.8f);
           
-          [percentageText drawInRect:percFrame withFont:self.percentageFont];
+            [percentageText drawInRect:percFrame withAttributes:@{NSFontAttributeName: self.percentageFont}];
           
           CGContextRestoreGState(ctx);
         } else {
-          [percentageText drawInRect:percFrame withFont:self.percentageFont];
+          [percentageText drawInRect:percFrame withAttributes:@{NSFontAttributeName: self.percentageFont}];
         }
 				
 				if (self.showArrow)
@@ -448,9 +539,17 @@
 				// display title on the left
 				CGContextSetRGBFillColor(ctx, 0.4f, 0.4f, 0.4f, 1.0f);
 				right_label_y += optimumSize.height - 4;
-				optimumSize = [component.title sizeWithFont:self.titleFont constrainedToSize:CGSizeMake(max_text_width,100)];
+                NSAttributedString *theTitle = [[NSAttributedString alloc] initWithString:component.title attributes:@{NSFontAttributeName: self.titleFont}];
+                CGRect theRec = [theTitle boundingRectWithSize:(CGSize){max_text_width, 100}
+                                                       options:nil
+                                                       context:nil];
+                optimumSize = theRec.size;
+				//optimumSize = [component.title sizeWithFont:self.titleFont constrainedToSize:CGSizeMake(max_text_width,100)];
 				CGRect titleFrame = CGRectMake(text_x, right_label_y, optimumSize.width, optimumSize.height);
-				[component.title drawInRect:titleFrame withFont:self.titleFont];
+				
+                [component.title drawInRect:titleFrame withAttributes:@{NSFontAttributeName: self.titleFont}];
+                
+                //[component.title drawInRect:titleFrame withFont:self.titleFont];
 				right_label_y += optimumSize.height + 10;
 			}
 			nextStartDeg = endDeg;
